@@ -10,6 +10,9 @@
 | `dora-vertex-proxy` | Google Vertex 图片模型代理 |
 | `glm-code-runner` | Python 代码执行沙箱调度器 |
 | `group_memory` plugin | 群消息记忆、周期总结、回答前注入群画像 |
+| `group_style_learner` plugin | 学习群友说话风格、口癖、句长、禁忌表达 |
+| `group_participation` plugin | 参与策略：直接问答、偶尔插嘴、冷却控制 |
+| `egg_persona` plugin | “一个蛋”群友型人格注入 |
 
 ## Message flow
 
@@ -70,4 +73,24 @@ flowchart TD
   E --> C
   C --> F["on_llm_request 注入群画像"]
   F --> G["Gemma/GLM 回复"]
+```
+
+
+## Egg persona / participation flow
+
+```mermaid
+flowchart TD
+  A["群消息"] --> B["group_memory 记录事实/群梗"]
+  A --> C["group_style_learner 学习说话风格"]
+  A --> D["group_participation 打分"]
+  B --> D
+  C --> D
+  D --> E{"该说话吗?"}
+  E -- 否 --> F["只潜水/记忆"]
+  E -- 直接问它 --> G["一个蛋直接回答"]
+  E -- 高价值插嘴 --> H["一个蛋短句插嘴"]
+  G --> I["Gemma/GLM"]
+  H --> I
+  C --> J["egg_persona 注入真人群友风格"]
+  J --> I
 ```

@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "group_only": true,
+  "style_dir": "data/group_style",
+  "provider_id": "glm5_default",
+  "summarize_every_messages": 80,
+  "max_samples": 160,
+  "max_sample_chars": 220,
+  "admin_only_manage": true,
+  "exclude_prefixes": [
+    "/群风格",
+    "/风格",
+    "/生图",
+    "/画图",
+    "/绘图",
+    "/image",
+    "/群记忆",
+    "/记忆",
+    "/群脑",
+    "/help",
+    "/plugin",
+    "/sid"
+  ]
+}

@@ -1,0 +1,4 @@
+name: group_participation
+version: 0.1.0
+author: Codex
+desc: 群友型参与策略：别人问一个蛋会答，平时按策略偶尔插嘴。

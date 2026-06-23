@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "group_only": true,
+  "provider_id": "ollama_gemma4_uncensored",
+  "state_dir": "data/group_participation",
+  "memory_dir": "data/group_memory",
+  "style_dir": "data/group_style",
+  "bot_names": ["一个蛋", "蛋蛋", "小蛋", "蛋", "bot", "机器人"],
+  "mode": "normal",
+  "admin_only_manage": true,
+  "max_context_messages": 14,
+  "max_reply_chars": 800,
+  "exclude_prefixes": ["/", "！", "!"],
+  "ability_keywords": ["生图", "画图", "代码", "跑代码", "执行", "部署", "docker", "github", "模型", "llm", "bot", "机器人", "架构", "报错", "怎么做", "怎么搞"]
+}

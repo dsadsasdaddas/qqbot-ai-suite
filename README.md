@@ -12,7 +12,10 @@
 - 显式代码执行：`/跑代码 ...`、`/跑py ...`
 - 生图：`/生图 1/2/3 prompt`，按档位调用 Google Vertex 图片模型
 - 群聊保护：群里屏蔽 `/help`、`/plugin`、`/sid`
+- “一个蛋”群友人格：真人短句、熟人吐槽、复杂问题认真答
 - 群记忆/群脑：自动记录群聊、周期总结、回答前注入群画像
+- 群风格学习：学习群口癖、句长、吐槽方式
+- 参与策略：别人问它会答，平时按冷却偶尔插嘴
 - Prompt 修改保护、红队模式、Gemma 闲聊风格优化
 
 ## 命令速览
@@ -30,6 +33,12 @@
 /群记忆 查看
 /群记忆 总结
 /群记忆 清空
+
+/群风格 查看
+/群风格 总结
+
+/参与策略 查看
+/参与策略 安静|正常|活跃|嘴欠
 ```
 
 ## 架构
@@ -43,6 +52,9 @@ flowchart TD
   AstrBot --> Router["glm_router\n/高级 + 智能执行"]
   AstrBot --> CodeSpace["glm_code_space\n/跑代码 /跑py"]
   AstrBot --> Memory["group_memory\n群脑/群画像注入"]
+  AstrBot --> StyleLearn["group_style_learner\n学习群友说话"]
+  AstrBot --> Participation["group_participation\n判断是否插嘴"]
+  AstrBot --> EggPersona["egg_persona\n一个蛋人格"]
   AstrBot --> Guards["help_guard / prompt_change_guard"]
 
   Router -->|"普通高级问答"| GLM["GLM API"]
