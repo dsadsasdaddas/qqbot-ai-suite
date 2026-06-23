@@ -9,6 +9,7 @@
 | `ollama-gemma4` | 可选本地 OpenAI-compatible LLM |
 | `dora-vertex-proxy` | Google Vertex 图片模型代理 |
 | `glm-code-runner` | Python 代码执行沙箱调度器 |
+| `group_memory` plugin | 群消息记忆、周期总结、回答前注入群画像 |
 
 ## Message flow
 
@@ -55,4 +56,18 @@ flowchart TD
   F --> G["docker run --network none --read-only"]
   G --> H["stdout/stderr"]
   H --> I["GLM summary"]
+```
+
+
+## Group memory flow
+
+```mermaid
+flowchart TD
+  A["群聊消息"] --> B["group_memory collect"]
+  B --> C["data/group_memory/*.json"]
+  C --> D{"达到总结阈值?"}
+  D -- yes --> E["GLM/Gemma summarizer"]
+  E --> C
+  C --> F["on_llm_request 注入群画像"]
+  F --> G["Gemma/GLM 回复"]
 ```

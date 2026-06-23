@@ -1,0 +1,27 @@
+{
+  "enabled": true,
+  "group_only": true,
+  "memory_dir": "data/group_memory",
+  "provider_id": "glm5_default",
+  "summarize_every_messages": 40,
+  "max_recent_messages": 80,
+  "inject_recent_messages": 8,
+  "max_inject_chars": 2200,
+  "max_message_chars": 500,
+  "auto_summarize": true,
+  "admin_only_manage": true,
+  "allowed_sessions": [],
+  "exclude_prefixes": [
+    "/群记忆",
+    "/记忆",
+    "/群脑",
+    "/生图",
+    "/画图",
+    "/绘图",
+    "/image",
+    "/help",
+    "/plugin",
+    "/sid",
+    "/dashboard_update"
+  ]
+}

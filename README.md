@@ -12,6 +12,7 @@
 - 显式代码执行：`/跑代码 ...`、`/跑py ...`
 - 生图：`/生图 1/2/3 prompt`，按档位调用 Google Vertex 图片模型
 - 群聊保护：群里屏蔽 `/help`、`/plugin`、`/sid`
+- 群记忆/群脑：自动记录群聊、周期总结、回答前注入群画像
 - Prompt 修改保护、红队模式、Gemma 闲聊风格优化
 
 ## 命令速览
@@ -25,6 +26,10 @@
 /高级 计算 2**100 是多少
 /跑代码 模拟投骰子 1000 次
 /跑py print(sum(range(101)))
+
+/群记忆 查看
+/群记忆 总结
+/群记忆 清空
 ```
 
 ## 架构
@@ -37,6 +42,7 @@ flowchart TD
   AstrBot --> Dora["dora_imagegen\n/生图 1/2/3"]
   AstrBot --> Router["glm_router\n/高级 + 智能执行"]
   AstrBot --> CodeSpace["glm_code_space\n/跑代码 /跑py"]
+  AstrBot --> Memory["group_memory\n群脑/群画像注入"]
   AstrBot --> Guards["help_guard / prompt_change_guard"]
 
   Router -->|"普通高级问答"| GLM["GLM API"]
@@ -95,7 +101,7 @@ docker compose -f docker-compose.example.yml up -d
 ## 目录
 
 ```text
-plugins/                     AstrBot 插件
+plugins/                     AstrBot 插件（含 group_memory 群脑）
 services/dora-vertex-proxy/   Google Vertex 图片代理
 services/glm-code-runner/     Docker Python 代码执行服务
 config/examples/              已脱敏配置模板

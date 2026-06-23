@@ -2,7 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 mkdir -p "$ROOT/data/plugins" "$ROOT/data/config" "$ROOT/secrets" "$ROOT/napcat/config"
-for p in dora_imagegen glm_router glm_code_space gemma_chat_style help_guard prompt_change_guard redteam_mode; do
+for p in dora_imagegen glm_router glm_code_space group_memory gemma_chat_style help_guard prompt_change_guard redteam_mode; do
   rm -rf "$ROOT/data/plugins/$p"
   cp -R "$ROOT/plugins/$p" "$ROOT/data/plugins/$p"
 done
