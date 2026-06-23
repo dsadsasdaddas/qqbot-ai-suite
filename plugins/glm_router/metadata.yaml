@@ -1,0 +1,4 @@
+name: glm_router
+desc: Gemma 判断任务难度，复杂任务交给 GLM；提示词修改请求受控拦截。
+author: Codex
+version: 0.2.2

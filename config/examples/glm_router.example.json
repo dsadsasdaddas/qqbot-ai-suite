@@ -1,0 +1,32 @@
+{
+  "glm_provider_id": "glm5_default",
+  "router_provider_id": "ollama_gemma4_uncensored",
+  "auto_route": false,
+  "force_prefixes": [
+    "glm",
+    "GLM",
+    "高级",
+    "深度",
+    "复杂",
+    "大脑"
+  ],
+  "reply_prefix": "",
+  "glm_threshold": 4,
+  "router_timeout_seconds": 8,
+  "router_max_tokens": 128,
+  "router_temperature": 0,
+  "router_context_messages": 4,
+  "glm_context_messages": 20,
+  "save_history": true,
+  "pass_images_to_glm": false,
+  "advanced_code_execution": true,
+  "advanced_code_exec_admin_only": true,
+  "advanced_code_exec_allowed_user_ids": [
+    "YOUR_QQ_ID"
+  ],
+  "code_runner_url": "http://glm-code-runner:8879/run",
+  "code_exec_timeout_seconds": 8,
+  "code_exec_max_reply_chars": 5000,
+  "code_exec_show_code": false,
+  "code_runner_token": ""
+}

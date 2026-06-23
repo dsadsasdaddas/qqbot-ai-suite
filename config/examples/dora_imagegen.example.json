@@ -1,0 +1,35 @@
+{
+  "endpoint": "http://172.23.0.1:8877/api/google-vertex/generate-frame",
+  "api_token": "CHANGE_ME_SAME_AS_DORA_API_TOKEN",
+  "timeout_seconds": 180,
+  "cooldown_seconds": 30,
+  "output_dir": "/AstrBot/data/temp/dora_imagegen",
+  "max_concurrent": 1,
+  "default_tier": "2",
+  "tiers": {
+    "1": {
+      "name": "快速",
+      "model": "gemini-2.5-flash-image",
+      "cooldown_seconds": 15,
+      "timeout_seconds": 120,
+      "description": "最快，适合表情包、头像、简单图标、随手草图。",
+      "style_prompt": "快速成图优先，画面主体明确，构图简洁，细节够用，不要过度复杂。"
+    },
+    "2": {
+      "name": "标准",
+      "model": "gemini-2.5-flash-image",
+      "cooldown_seconds": 30,
+      "timeout_seconds": 180,
+      "description": "默认档，速度和质量均衡，适合大多数生图。",
+      "style_prompt": "质量和速度均衡，画面完整，主体清楚，光影自然，细节丰富但不过度堆叠。"
+    },
+    "3": {
+      "name": "精细",
+      "model": "gemini-3.1-flash-image",
+      "cooldown_seconds": 75,
+      "timeout_seconds": 260,
+      "description": "更慢但更细，适合复杂场景、海报、角色、参考图重绘。",
+      "style_prompt": "高质量精细成图，复杂构图也要稳定，细节丰富，材质、光影、氛围、背景层次完整。"
+    }
+  }
+}

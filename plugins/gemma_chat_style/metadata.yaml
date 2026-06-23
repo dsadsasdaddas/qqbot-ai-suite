@@ -1,0 +1,4 @@
+name: gemma_chat_style
+desc: 让 Gemma 成为主 Agent：闲聊短且像真人；提示词变更受控。
+author: Codex
+version: 0.2.1

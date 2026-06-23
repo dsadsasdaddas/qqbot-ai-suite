@@ -1,0 +1,31 @@
+# Runtime secrets / credentials
+.env
+.env.*
+!.env.example
+secrets/
+*service-account*.json
+*gcp*service*account*.json
+*.pem
+*.key
+*.token
+
+# AstrBot / QQ runtime data
+data/
+ntqq/
+napcat/config/
+clash/
+ollama-local/
+code_runner/work/
+
+# Generated outputs / logs
+logs/
+*.log
+.vertex-proxy.pid
+data/generated_images/
+__pycache__/
+*.py[cod]
+*.zip
+.DS_Store
+
+# Local scratch / old vendor checkout
+dora-google-vertex-imagegen-method/.env

@@ -1,0 +1,4 @@
+name: redteam_mode
+desc: Gemma 主 Agent + GLM worker 的红队测试模式；命令 /redteam。
+author: Codex
+version: 0.2.3

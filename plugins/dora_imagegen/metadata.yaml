@@ -1,0 +1,4 @@
+name: dora_imagegen
+desc: 使用 Google Vertex Gemini 图片模型为 QQ Bot 提供 /画图 生图命令
+author: Codex
+version: 0.1.0

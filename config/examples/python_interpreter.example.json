@@ -1,0 +1,7 @@
+{
+  "sandbox": {
+    "image": "soulter/astrbot-code-interpreter-sandbox",
+    "docker_mirror": ""
+  },
+  "docker_host_astrbot_abs_path": ""
+}

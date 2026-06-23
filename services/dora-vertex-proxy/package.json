@@ -1,0 +1,12 @@
+{
+  "name": "dora-google-vertex-imagegen-method",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "proxy": "node scripts/google-vertex-image-proxy.mjs",
+    "start": "node scripts/google-vertex-image-proxy.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

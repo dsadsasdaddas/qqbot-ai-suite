@@ -1,0 +1,4 @@
+name: glm_code_space
+desc: 让 GLM 生成 Python 代码并在隔离 Docker 沙箱中执行。
+author: Codex
+version: 0.1.0

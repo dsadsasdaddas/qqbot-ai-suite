@@ -1,0 +1,93 @@
+services:
+  dora-vertex-proxy:
+    image: docker.m.daocloud.io/library/node:25-alpine
+    container_name: dora-vertex-proxy
+    restart: unless-stopped
+    network_mode: host
+    working_dir: /app
+    command: ["node", "scripts/google-vertex-image-proxy.mjs"]
+    env_file:
+      - .env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-service-account.json
+    volumes:
+      - ./services/dora-vertex-proxy:/app:ro
+      - ./secrets/gcp-service-account.json:/secrets/gcp-service-account.json:ro
+
+  astrbot:
+    image: soulter/astrbot:latest
+    container_name: astrbot
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "6185:6185"
+      - "127.0.0.1:6199:6199"
+    volumes:
+      - ./data:/AstrBot/data
+    networks:
+      - astrbot_network
+
+  napcat:
+    image: mlikiowa/napcat-docker:latest
+    container_name: napcat
+    restart: unless-stopped
+    environment:
+      - NAPCAT_UID=1000
+      - NAPCAT_GID=1000
+      - MODE=astrbot
+      - TZ=Asia/Shanghai
+    ports:
+      - "6099:6099"
+    volumes:
+      - ./data:/AstrBot/data
+      - ./napcat/config:/app/napcat/config
+      - ./ntqq:/app/.config/QQ
+    depends_on:
+      - astrbot
+    networks:
+      - astrbot_network
+
+  glm-code-runner:
+    image: soulter/astrbot:latest
+    container_name: glm-code-runner
+    restart: unless-stopped
+    command: ["python3", "/app/server.py"]
+    environment:
+      - BIND_HOST=0.0.0.0
+      - PORT=8879
+      - TOKEN_FILE=/secrets/glm_code_runner.token
+      - SANDBOX_IMAGE=soulter/astrbot:latest
+      - MAX_CONCURRENCY=2
+      - DEFAULT_TIMEOUT=8
+      - MAX_TIMEOUT=15
+      - SANDBOX_MEMORY=256m
+      - SANDBOX_CPUS=0.5
+    volumes:
+      - ./services/glm-code-runner/server.py:/app/server.py:ro
+      - ./secrets/glm_code_runner.token:/secrets/glm_code_runner.token:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker:ro
+    networks:
+      - astrbot_network
+
+  # Optional local LLM. Pull your model manually and configure AstrBot provider:
+  # api_base: http://ollama-gemma4:11435/v1
+  ollama-gemma4:
+    image: ollama/ollama:latest
+    container_name: ollama-gemma4
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11435
+      - OLLAMA_MODELS=/models
+      - OLLAMA_ORIGINS=*
+    volumes:
+      - ./ollama-models:/models
+    networks:
+      - astrbot_network
+    profiles:
+      - ollama
+
+networks:
+  astrbot_network:
+    driver: bridge

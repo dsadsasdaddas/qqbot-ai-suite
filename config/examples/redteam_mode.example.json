@@ -1,0 +1,8 @@
+{
+  "enabled_sessions": {
+    "aiocqhttp:FriendMessage:YOUR_QQ_ID": false
+  },
+  "gemma_provider_id": "ollama_gemma4_uncensored",
+  "glm_provider_id": "glm5_default",
+  "save_reports": false
+}

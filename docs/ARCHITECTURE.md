@@ -1,0 +1,58 @@
+# Architecture
+
+## Runtime services
+
+| Service | Role |
+|---|---|
+| `napcat` | QQ 登录与 OneBot v11 适配 |
+| `astrbot` | Bot 主框架、插件运行时、会话管理 |
+| `ollama-gemma4` | 可选本地 OpenAI-compatible LLM |
+| `dora-vertex-proxy` | Google Vertex 图片模型代理 |
+| `glm-code-runner` | Python 代码执行沙箱调度器 |
+
+## Message flow
+
+```mermaid
+sequenceDiagram
+  participant QQ
+  participant NapCat
+  participant AstrBot
+  participant Plugin
+  participant Model
+
+  QQ->>NapCat: group/friend message
+  NapCat->>AstrBot: OneBot event
+  AstrBot->>Plugin: command/filter dispatch
+  Plugin->>Model: LLM/Image/Runner request
+  Model-->>Plugin: result
+  Plugin-->>AstrBot: message chain
+  AstrBot-->>NapCat: send_msg
+  NapCat-->>QQ: text/image reply
+```
+
+## Image generation flow
+
+```mermaid
+flowchart LR
+  A["/生图 1/2/3 prompt"] --> B["dora_imagegen"]
+  B --> C["tier parser"]
+  C --> D["dora-vertex-proxy"]
+  D --> E["Google Vertex AI"]
+  E --> D --> F["imageBase64"]
+  F --> G["/AstrBot/data/temp/dora_imagegen"]
+  G --> H["NapCat sends image"]
+```
+
+## Advanced GLM + code execution
+
+```mermaid
+flowchart TD
+  A["/高级 task"] --> B["glm_router"]
+  B --> C{"looks like execution?"}
+  C -- no --> D["GLM text answer"]
+  C -- yes --> E["GLM plans Python JSON"]
+  E --> F["glm-code-runner /run"]
+  F --> G["docker run --network none --read-only"]
+  G --> H["stdout/stderr"]
+  H --> I["GLM summary"]
+```

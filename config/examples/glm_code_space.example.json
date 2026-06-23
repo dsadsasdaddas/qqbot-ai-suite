@@ -1,0 +1,12 @@
+{
+  "glm_provider_id": "glm5_default",
+  "runner_url": "http://glm-code-runner:8879/run",
+  "runner_token": "CHANGE_ME_SAME_AS_GLM_CODE_RUNNER_TOKEN",
+  "gen_timeout_seconds": 60,
+  "run_timeout_seconds": 8,
+  "max_reply_chars": 5000,
+  "show_code": false,
+  "allowed_user_ids": [
+    "YOUR_QQ_ID"
+  ]
+}

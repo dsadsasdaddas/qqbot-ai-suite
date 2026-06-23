@@ -1,0 +1,4 @@
+name: prompt_change_guard
+desc: 提示词变更治理：没有服务器所有者明确授权，不允许通过聊天修改提示词配置。
+author: Codex
+version: 0.1.0
