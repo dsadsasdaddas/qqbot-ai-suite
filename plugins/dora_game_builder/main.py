@@ -32,7 +32,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 DORA_GAME_SYSTEM = r"""
 你是 Dora SSR 小游戏生成器。你要根据用户需求生成一个可运行的 Dora SSR Lua 项目。
 
-只输出严格 JSON，不要 Markdown，不要代码围栏，不要解释。
+只输出严格 JSON，不要 Markdown，不要代码围栏，不要解释，不要推理过程。
 JSON schema:
 {
   "title": "游戏标题，20字内",
@@ -51,7 +51,9 @@ Dora Lua 约束：
 - 使用 `root:schedule(function(dt) ... return false end)` 做主循环。
 - 支持键盘方向键/WASD，鼠标点击也可以。
 - 默认窗口约 1280x720，坐标中心为 (0,0)。
-- 代码要短、稳定、能跑，玩法先做 MVP。
+- 代码要短、稳定、能跑，玩法先做 MVP，init.lua 控制在 220 行以内。
+- 如果需要键盘输入，优先轮询 `Keyboard:isKeyDown("Left")` / `Keyboard:isKeyPressed("Left")`，不要臆造不存在的 API。
+- DrawNode 多边形用 `draw:drawPolygon(points, fillColor, 0, Color())`。
 
 安全限制：
 - 禁止 os.execute、io.popen、loadfile、dofile、package.loadlib。
@@ -88,6 +90,245 @@ DANGEROUS_PATTERNS = [
         r"/var/run/docker\.sock", r"/home/", r"/root/", r"/etc/",
     ]
 ]
+
+SNAKE_LUA = r"""
+local _ENV = Dora
+
+Director.clearColor = Color(0xff101020)
+
+local root = Node()
+Director.entry:addChild(root)
+
+local draw = DrawNode()
+root:addChild(draw)
+
+local gridSize = 24
+local cols = 28
+local rows = 18
+local ox = -cols * gridSize / 2
+local oy = -rows * gridSize / 2
+
+local snake = {}
+local dir = {x = 1, y = 0}
+local nextDir = {x = 1, y = 0}
+local food = {x = 20, y = 9}
+local score = 0
+local gameOver = false
+local moveTimer = 0
+local moveInterval = 0.12
+local mouseWasDown = false
+
+local function randFood()
+  for _ = 1, 300 do
+    local fx = math.random(0, cols - 1)
+    local fy = math.random(0, rows - 1)
+    local ok = true
+    for _, s in ipairs(snake) do
+      if s.x == fx and s.y == fy then ok = false break end
+    end
+    if ok then food.x = fx food.y = fy return end
+  end
+end
+
+local function reset()
+  snake = {{x = 14, y = 9}, {x = 13, y = 9}, {x = 12, y = 9}}
+  dir = {x = 1, y = 0}
+  nextDir = {x = 1, y = 0}
+  food = {x = 20, y = 9}
+  score = 0
+  gameOver = false
+  moveTimer = 0
+  randFood()
+end
+
+local function pos(gx, gy)
+  return Vec2(ox + gx * gridSize + gridSize / 2, oy + gy * gridSize + gridSize / 2)
+end
+
+local function box(gx, gy, color)
+  local x = ox + gx * gridSize + 2
+  local y = oy + gy * gridSize + 2
+  local s = gridSize - 4
+  draw:drawPolygon({Vec2(x, y), Vec2(x + s, y), Vec2(x + s, y + s), Vec2(x, y + s)}, color, 0, Color())
+end
+
+local scoreLabel = Label("sarasa-mono-sc-regular", 28)
+if scoreLabel then
+  scoreLabel.position = Vec2(-210, 310)
+  Director.ui:addChild(scoreLabel)
+end
+
+local msgLabel = Label("sarasa-mono-sc-regular", 28)
+if msgLabel then
+  msgLabel.position = Vec2(0, 270)
+  Director.ui:addChild(msgLabel)
+end
+
+reset()
+
+root:schedule(function(dt)
+  if Keyboard then
+    if Keyboard:isKeyDown("Up") or Keyboard:isKeyDown("W") then
+      if dir.y ~= -1 then nextDir = {x = 0, y = 1} end
+    elseif Keyboard:isKeyDown("Down") or Keyboard:isKeyDown("S") then
+      if dir.y ~= 1 then nextDir = {x = 0, y = -1} end
+    elseif Keyboard:isKeyDown("Left") or Keyboard:isKeyDown("A") then
+      if dir.x ~= 1 then nextDir = {x = -1, y = 0} end
+    elseif Keyboard:isKeyDown("Right") or Keyboard:isKeyDown("D") then
+      if dir.x ~= -1 then nextDir = {x = 1, y = 0} end
+    elseif Keyboard:isKeyDown("R") then
+      reset()
+    end
+  end
+  if Mouse then
+    local down = Mouse.leftButtonPressed
+    if down and not mouseWasDown and gameOver then reset() end
+    mouseWasDown = down
+  end
+
+  if not gameOver then
+    moveTimer = moveTimer + dt
+    if moveTimer >= moveInterval then
+      moveTimer = moveTimer - moveInterval
+      dir = nextDir
+      local head = snake[1]
+      local nh = {x = head.x + dir.x, y = head.y + dir.y}
+      if nh.x < 0 or nh.x >= cols or nh.y < 0 or nh.y >= rows then
+        gameOver = true
+      else
+        for _, s in ipairs(snake) do
+          if s.x == nh.x and s.y == nh.y then gameOver = true break end
+        end
+      end
+      if not gameOver then
+        table.insert(snake, 1, nh)
+        if nh.x == food.x and nh.y == food.y then
+          score = score + 10
+          randFood()
+        else
+          table.remove(snake)
+        end
+      end
+    end
+  end
+
+  draw:clear()
+  local bw = cols * gridSize
+  local bh = rows * gridSize
+  draw:drawSegment(Vec2(ox, oy), Vec2(ox + bw, oy), 2, Color(0xff4466aa))
+  draw:drawSegment(Vec2(ox, oy + bh), Vec2(ox + bw, oy + bh), 2, Color(0xff4466aa))
+  draw:drawSegment(Vec2(ox, oy), Vec2(ox, oy + bh), 2, Color(0xff4466aa))
+  draw:drawSegment(Vec2(ox + bw, oy), Vec2(ox + bw, oy + bh), 2, Color(0xff4466aa))
+  draw:drawDot(pos(food.x, food.y), gridSize / 2 - 2, Color(0xffff5566))
+  for i, s in ipairs(snake) do
+    box(s.x, s.y, i == 1 and Color(0xffccff66) or Color(0xff44dd66))
+  end
+  if scoreLabel then scoreLabel.text = "贪吃蛇  分数: " .. score end
+  if msgLabel then
+    msgLabel.text = gameOver and "游戏结束：按 R 或鼠标点击重开" or "方向键/WASD 控制，吃红点变长"
+  end
+  return false
+end)
+""".strip()
+
+GENERIC_DODGE_LUA = r"""
+local _ENV = Dora
+
+Director.clearColor = Color(0xff101828)
+
+local root = Node()
+Director.entry:addChild(root)
+local draw = DrawNode()
+root:addChild(draw)
+
+local player = Vec2(0, -250)
+local speed = 360
+local score = 0
+local lives = 3
+local over = false
+local spawnTimer = 0
+local mouseWasDown = false
+local balls = {}
+
+local titleLabel = Label("sarasa-mono-sc-regular", 30)
+if titleLabel then
+  titleLabel.position = Vec2(0, 310)
+  Director.ui:addChild(titleLabel)
+end
+local infoLabel = Label("sarasa-mono-sc-regular", 24)
+if infoLabel then
+  infoLabel.position = Vec2(0, 270)
+  Director.ui:addChild(infoLabel)
+end
+
+local function reset()
+  player = Vec2(0, -250)
+  score = 0
+  lives = 3
+  over = false
+  spawnTimer = 0
+  balls = {}
+end
+
+local function spawn()
+  local x = math.random(-560, 560)
+  local r = math.random(14, 30)
+  table.insert(balls, {pos = Vec2(x, 360), vel = Vec2(math.random(-60, 60), -math.random(160, 300)), r = r})
+end
+
+root:schedule(function(dt)
+  if Keyboard and Keyboard:isKeyDown("R") then reset() end
+  if Mouse then
+    local down = Mouse.leftButtonPressed
+    if down and not mouseWasDown and over then reset() end
+    mouseWasDown = down
+  end
+
+  if not over then
+    local dx, dy = 0, 0
+    if Keyboard then
+      if Keyboard:isKeyPressed("Left") or Keyboard:isKeyPressed("A") then dx = dx - 1 end
+      if Keyboard:isKeyPressed("Right") or Keyboard:isKeyPressed("D") then dx = dx + 1 end
+      if Keyboard:isKeyPressed("Up") or Keyboard:isKeyPressed("W") then dy = dy + 1 end
+      if Keyboard:isKeyPressed("Down") or Keyboard:isKeyPressed("S") then dy = dy - 1 end
+    end
+    player = Vec2(math.max(-590, math.min(590, player.x + dx * speed * dt)), math.max(-320, math.min(320, player.y + dy * speed * dt)))
+    spawnTimer = spawnTimer + dt
+    if spawnTimer > 0.45 then
+      spawnTimer = 0
+      spawn()
+    end
+    for i = #balls, 1, -1 do
+      local b = balls[i]
+      b.pos = Vec2(b.pos.x + b.vel.x * dt, b.pos.y + b.vel.y * dt)
+      local ddx = b.pos.x - player.x
+      local ddy = b.pos.y - player.y
+      local rr = b.r + 22
+      if ddx * ddx + ddy * ddy < rr * rr then
+        lives = lives - 1
+        table.remove(balls, i)
+        if lives <= 0 then over = true end
+      elseif b.pos.y < -390 then
+        score = score + 1
+        table.remove(balls, i)
+      end
+    end
+  end
+
+  draw:clear()
+  draw:drawDot(player, 24, Color(0xff67e8f9))
+  draw:drawDot(Vec2(player.x - 8, player.y + 8), 4, Color(0xffffffff))
+  draw:drawDot(Vec2(player.x + 8, player.y + 8), 4, Color(0xffffffff))
+  for _, b in ipairs(balls) do
+    draw:drawDot(b.pos, b.r, Color(0xffff667a))
+  end
+  if titleLabel then titleLabel.text = "Dora 迷你挑战" end
+  if infoLabel then
+    infoLabel.text = over and ("结束！得分 " .. score .. "，按 R/点击重开") or ("WASD/方向键躲球  得分:" .. score .. "  生命:" .. lives)
+  end
+  return false
+end)
+""".strip()
 
 
 def load_cfg() -> Dict[str, Any]:
@@ -182,6 +423,30 @@ def validate_generated(obj: Dict[str, Any], cfg: Dict[str, Any]) -> Dict[str, An
     return {"title": title, "description": desc, "files": clean_files}
 
 
+def template_for_prompt(prompt: str) -> Dict[str, Any]:
+    text = (prompt or "").lower()
+    raw = prompt or ""
+    if "贪吃蛇" in raw or "snake" in text or "貪吃蛇" in raw:
+        return {
+            "title": "贪吃蛇",
+            "description": "方向键/WASD 控制蛇吃红点，撞墙或撞到自己结束，R 键重开。",
+            "files": {"init.lua": SNAKE_LUA},
+        }
+    return {}
+
+
+def fallback_game(prompt: str) -> Dict[str, Any]:
+    title = re.sub(r"\s+", " ", (prompt or "")).strip(" ：:，,。")
+    if not title:
+        title = "迷你挑战"
+    title = title[:16].replace("\n", " ")
+    return {
+        "title": title,
+        "description": "LLM 生成失败时的稳定兜底版：WASD/方向键移动，躲开下落红球，按 R 重开。",
+        "files": {"init.lua": GENERIC_DODGE_LUA},
+    }
+
+
 def make_game_id(sender_id: str) -> str:
     sid = re.sub(r"\D+", "", str(sender_id or "0"))[-6:] or "user"
     return f"g{sid}{int(time.time()) % 100000:x}{secrets.token_hex(3)}"
@@ -191,7 +456,7 @@ def make_game_id(sender_id: str) -> str:
     name="dora_game_builder",
     desc="用 GLM 生成 Dora SSR 小游戏，并通过隔离 Docker Runtime + noVNC 返回网页预览。",
     author="Codex",
-    version="0.1.0",
+    version="0.1.1",
 )
 class Main(star.Star):
     def __init__(self, context: star.Context) -> None:
@@ -223,6 +488,11 @@ class Main(star.Star):
         return headers
 
     async def _generate_game(self, event: AstrMessageEvent, prompt: str, cfg: Dict[str, Any]) -> Dict[str, Any]:
+        templated = template_for_prompt(prompt)
+        if templated:
+            logger.info(f"dora_game_builder 使用本地稳定模板：{templated.get('title')}")
+            return validate_generated(templated, cfg)
+
         provider_id = str(cfg.get("glm_provider_id") or "glm5_default")
         provider = self.context.get_provider_by_id(provider_id)
         if provider is None:
@@ -230,7 +500,7 @@ class Main(star.Star):
         user_prompt = (
             "用户想要的 Dora SSR 小游戏：\n"
             f"{clip(prompt, int(cfg.get('max_prompt_chars', 1200) or 1200))}\n\n"
-            "请生成一个最小可玩版本，必须严格输出 JSON。"
+            "请生成一个最小可玩版本。不要解释，不要推理，不要 Markdown，必须严格输出 JSON。"
         )
         resp = await provider.text_chat(
             prompt=user_prompt,
@@ -288,7 +558,13 @@ class Main(star.Star):
         game_id = make_game_id(str(event.get_sender_id() or "user"))
         yield event.plain_result(f"收到，正在生成 Dora 小游戏 {game_id}，这玩意儿要启动引擎，稍等一下。")
         try:
-            game = await self._generate_game(event, prompt, cfg)
+            try:
+                game = await self._generate_game(event, prompt, cfg)
+            except Exception as gen_exc:
+                logger.warning(
+                    f"dora_game_builder LLM 生成失败，改用稳定兜底模板：{type(gen_exc).__name__}: {gen_exc}"
+                )
+                game = validate_generated(fallback_game(prompt), cfg)
             payload = {
                 "game_id": game_id,
                 "title": game.get("title") or game_id,

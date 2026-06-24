@@ -1,4 +1,4 @@
 name: dora_game_builder
 desc: 用 GLM 生成 Dora SSR 小游戏，并通过隔离 Docker Runtime + noVNC 返回网页预览。
 author: Codex
-version: 0.1.0
+version: 0.1.1
