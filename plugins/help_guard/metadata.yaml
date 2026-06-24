@@ -1,4 +1,4 @@
 name: help_guard
-desc: 禁止在群聊公开展示 /help 和 /plugin 等机器人内部信息
+desc: 提供产品化 /help，并禁止在群聊公开展示 /plugin 和 /sid 等内部信息
 author: Codex
-version: 0.1.0
+version: 0.2.0
