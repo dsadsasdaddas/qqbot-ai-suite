@@ -13,6 +13,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
+from urllib.parse import quote
 
 from aiohttp import ClientSession, WSMsgType, web
 
@@ -373,9 +374,14 @@ async def play_entry(request: web.Request) -> web.StreamResponse:
     if not validate_play_token(request, session, game_id):
         return web.Response(status=403, text="forbidden")
     # noVNC page, with websockify path routed back through this gateway.
-    location = f"/play/{game_id}/vnc.html?autoconnect=1&resize=scale&path=play/{game_id}/websockify"
+    # Keep token both in a SameSite cookie and in the redirected URL/websocket path.
+    # Some embedded browsers and curl-like clients do not persist the Set-Cookie
+    # across the first redirect, which made valid play links land on 403.
+    token = str(session.get("token") or "")
+    ws_path = quote(f"play/{game_id}/websockify?token={token}", safe="")
+    location = f"/play/{game_id}/vnc.html?autoconnect=1&resize=scale&token={token}&path={ws_path}"
     resp = web.HTTPFound(location)
-    resp.set_cookie(f"dora_play_{game_id}", str(session.get("token")), max_age=max(60, int(session.get("expires_at", 0)) - now()), httponly=True, samesite="Lax")
+    resp.set_cookie(f"dora_play_{game_id}", token, max_age=max(60, int(session.get("expires_at", 0)) - now()), httponly=True, samesite="Lax")
     return resp
 
 
