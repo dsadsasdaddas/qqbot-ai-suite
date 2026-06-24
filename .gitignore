@@ -28,7 +28,7 @@ __pycache__/
 .DS_Store
 
 # Local scratch / old vendor checkout
-dora-google-vertex-imagegen-method/.env
+dora-google-vertex-imagegen-method/
 
 # Dora generated game runtime data
 dora/projects/
@@ -52,3 +52,31 @@ snakefix*.bgr0
 # Local one-off scripts/dumps that should be promoted intentionally before commit
 *_main.py
 *_pkg/
+
+# Local legacy/prototyping artifacts kept out of the public product repo.
+/README-image-gen.md
+/SETUP-IMAGEGEN.md
+/bot.py
+/check_glm_code_space_remote.sh
+/codex_mobile.py
+/configure_mihomo_docker_proxy.sh
+/deploy_codex_mobile_remote.sh
+/deploy_glm_code_space_remote.sh
+/deploy_redteam_mode.sh
+/gemma_chat_style.py
+/glm_code_runner_server.py
+/glm_code_space.py
+/hookd_std_main.rs
+/plugins/image_gen/
+/prompt_change_guard.py
+/redteam_mode.py
+/requirements-image-gen.txt
+/scripts/check-vertex-proxy.sh
+/scripts/start-vertex-proxy.sh
+/scripts/stop-vertex-proxy.sh
+/scripts/test-command-dispatch.py
+/scripts/test-plugin-direct.py
+/scripts/test-vertex-generate.sh
+/start_glm_code_runner.sh
+/start_runner_container_remote.sh
+/, m.parse_redteam_command(s))*
