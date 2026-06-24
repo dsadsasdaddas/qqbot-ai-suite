@@ -1,0 +1,145 @@
+# Production compose template copied from server and redacted.
+# Do not commit real .env, data/, secrets/, QQ runtime state, or generated game sessions.
+
+services:
+  dora-vertex-proxy:
+    image: docker.m.daocloud.io/library/node:25-alpine
+    container_name: dora-vertex-proxy
+    restart: unless-stopped
+    network_mode: host
+    working_dir: /app
+    command: ["node", "scripts/google-vertex-image-proxy.mjs"]
+    env_file:
+      - .env.prod.example
+    environment:
+      GOOGLE_VERTEX_PROXY_PORT: "8877"
+      GOOGLE_VERTEX_PROXY_HOST: "0.0.0.0"
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-service-account.json
+      HTTP_PROXY: http://127.0.0.1:7891
+      HTTPS_PROXY: http://127.0.0.1:7891
+      ALL_PROXY: http://127.0.0.1:7891
+      NODE_USE_ENV_PROXY: "1"
+      NO_PROXY: localhost,127.0.0.1
+    volumes:
+      - ./dora-google-vertex-imagegen-method:/app:ro
+      - ./secrets/gcp-service-account.example.json:/secrets/gcp-service-account.json:ro
+
+  astrbot:
+    image: soulter/astrbot:latest
+    container_name: astrbot
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+      - HOME=/home/wzu
+      - CODEX_HOME=/home/wzu/.codex
+      - GIT_CONFIG_GLOBAL=/home/wzu/.gitconfig
+    ports:
+      - "6185:6185"
+      # 本机调试用；NapCat 容器内会直接访问 astrbot:6199，不依赖宿主机映射
+      - "127.0.0.1:6199:6199"
+    volumes:
+      - ./data:/AstrBot/data
+      - /www/server/nodejs:/www/server/nodejs:ro
+      - /usr/local/bin/node:/usr/local/bin/node:ro
+      - /home/wzu/.local:/home/wzu/.local:ro
+      - /home/wzu/.codex:/home/wzu/.codex
+      - /home/wzu/codex-mobile:/home/wzu/codex-mobile
+      - /usr/bin/git:/usr/bin/git:ro
+      - /usr/lib/git-core:/usr/lib/git-core:ro
+      - /usr/share/git-core:/usr/share/git-core:ro
+      - /home/wzu/.gitconfig:/home/wzu/.gitconfig:ro
+    networks:
+      - astrbot_network
+
+
+  qqbot-hookd:
+    build:
+      context: ./services/rust-hook
+    image: qqbot-hookd:latest
+    container_name: qqbot-hookd
+    restart: unless-stopped
+    user: "1000:1000"
+    environment:
+      - BIND_ADDR=0.0.0.0:8788
+      - RUNNER_URL=http://claude-glm-runner:8790
+      - TOKEN_CONFIG_PATH=/config/claude_glm_runner.json
+      - STATE_DIR=/data/.agent_state
+      - JOBS_DIR=/data/.agent_state/jobs
+      - DEFAULT_TIMEOUT_SECS=1200
+    ports:
+      - "127.0.0.1:8788:8788"
+    volumes:
+      - ./data/config:/config:ro  # create from config/examples before production
+      - ./.agent_state:/data/.agent_state
+    networks:
+      - astrbot_network
+
+  napcat:
+    image: mlikiowa/napcat-docker:latest
+    container_name: napcat
+    restart: unless-stopped
+    environment:
+      - NAPCAT_UID=1000
+      - NAPCAT_GID=1000
+      - MODE=astrbot
+      - TZ=Asia/Shanghai
+    ports:
+      - "6099:6099"
+    volumes:
+      - ./data:/AstrBot/data
+      - ./napcat/config:/app/napcat/config
+      - ./ntqq:/app/.config/QQ
+    depends_on:
+      - astrbot
+    networks:
+      - astrbot_network
+
+
+  dora-runtime-image:
+    build:
+      context: ./services/dora-runtime
+    image: qqbot/dora-runtime:latest
+    profiles:
+      - dora-build
+    command: ["true"]
+
+  dora-game-gateway:
+    build:
+      context: ./services/dora-game-gateway
+    image: qqbot/dora-game-gateway:latest
+    container_name: dora-game-gateway
+    restart: unless-stopped
+    environment:
+      - BIND_HOST=0.0.0.0
+      - PORT=8890
+      - PUBLIC_BASE_URL=http://100.70.188.115:8890
+      - DORA_GATEWAY_TOKEN_FILE=/run/secrets/dora_game_gateway_token
+      - DORA_RUNTIME_IMAGE=qqbot/dora-runtime:latest
+      - DORA_DOCKER_NETWORK=qqbot_dora_games
+      - HOST_PROJECTS_DIR=/home/wzu/qqbot/dora/projects
+      - SESSIONS_DIR=/data
+      - DEFAULT_TTL_SECONDS=1800
+      - RUNTIME_MEMORY=768m
+      - RUNTIME_CPUS=1.0
+    ports:
+      - "127.0.0.1:8890:8890"
+      - "100.70.188.115:8890:8890"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - ./dora/projects:/home/wzu/qqbot/dora/projects
+      - ./dora/sessions:/data
+      - ./data/secrets/dora_game_gateway.token.example:/run/secrets/dora_game_gateway_token:ro
+    networks:
+      - astrbot_network
+      - dora_games
+    profiles:
+      - dora
+
+networks:
+  astrbot_network:
+    driver: bridge
+  dora_games:
+    name: qqbot_dora_games
+    driver: bridge
+    internal: true

@@ -1,0 +1,10 @@
+{
+  "runner_url": "http://qqbot-hookd:8788",
+  "runner_token": "",
+  "allowed_user_ids": ["1939455790"],
+  "timeout_seconds": 1200,
+  "max_reply_chars": 7000,
+  "continue_session": true,
+  "job_poll_interval_seconds": 8,
+  "job_auto_push": true
+}

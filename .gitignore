@@ -33,3 +33,22 @@ dora-google-vertex-imagegen-method/.env
 # Dora generated game runtime data
 dora/projects/
 dora/sessions/
+
+# Production runner private state
+.agent_state/
+.claude-glm/
+*.pid
+*.bak
+*.bak.*
+*.b64
+
+# Large local/model artifacts and screenshots
+*.tar.zst
+*.tar.zst.parts/
+smoke*.png
+snakefix*.png
+snakefix*.bgr0
+
+# Local one-off scripts/dumps that should be promoted intentionally before commit
+*_main.py
+*_pkg/

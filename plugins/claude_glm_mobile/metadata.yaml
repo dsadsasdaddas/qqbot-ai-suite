@@ -1,0 +1,4 @@
+name: claude_glm_mobile
+desc: QQ hook for Claude Code CLI in YOLO mode with GLM offline Anthropic-compatible injection.
+version: 0.1.0
+author: Codex

@@ -1,0 +1,4 @@
+name: codex_disabled_guard
+desc: Codex command disabled; redirects to GLM Claude-style longtask agent.
+version: 0.1.0
+author: Codex
