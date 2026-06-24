@@ -561,8 +561,9 @@ class Main(star.Star):
             try:
                 game = await self._generate_game(event, prompt, cfg)
             except Exception as gen_exc:
+                gen_err = clip(str(gen_exc), 500).replace("\n", " ")
                 logger.warning(
-                    f"dora_game_builder LLM 生成失败，改用稳定兜底模板：{type(gen_exc).__name__}: {gen_exc}"
+                    f"dora_game_builder LLM 生成失败，改用稳定兜底模板：{type(gen_exc).__name__}: {gen_err}"
                 )
                 game = validate_generated(fallback_game(prompt), cfg)
             payload = {
