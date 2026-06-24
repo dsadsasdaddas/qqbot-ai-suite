@@ -29,3 +29,7 @@ __pycache__/
 
 # Local scratch / old vendor checkout
 dora-google-vertex-imagegen-method/.env
+
+# Dora generated game runtime data
+dora/projects/
+dora/sessions/

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "gateway_url": "http://dora-game-gateway:8890",
+  "gateway_token": "CHANGE_ME",
+  "gateway_token_file": "",
+  "glm_provider_id": "glm5_default",
+  "ttl_seconds": 1800,
+  "max_prompt_chars": 1200,
+  "max_code_chars": 18000,
+  "admin_only_create": true,
+  "allowed_user_ids": ["1939455790"],
+  "public_hint": "链接有效期约 30 分钟。"
+}

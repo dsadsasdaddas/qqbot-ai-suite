@@ -71,6 +71,48 @@ services:
     networks:
       - astrbot_network
 
+  # Build-only service for the sandboxed Dora SSR runtime image.
+  # Build with: docker compose --profile dora-build build dora-runtime-image
+  dora-runtime-image:
+    build:
+      context: ./services/dora-runtime
+    image: qqbot/dora-runtime:latest
+    profiles:
+      - dora-build
+    command: ["true"]
+
+  dora-game-gateway:
+    build:
+      context: ./services/dora-game-gateway
+    image: qqbot/dora-game-gateway:latest
+    container_name: dora-game-gateway
+    restart: unless-stopped
+    environment:
+      - BIND_HOST=0.0.0.0
+      - PORT=8890
+      - PUBLIC_BASE_URL=http://127.0.0.1:8890
+      - DORA_GATEWAY_TOKEN_FILE=/run/secrets/dora_game_gateway_token
+      - DORA_RUNTIME_IMAGE=qqbot/dora-runtime:latest
+      - DORA_DOCKER_NETWORK=qqbot_dora_games
+      - HOST_PROJECTS_DIR=/home/wzu/qqbot/dora/projects
+      - SESSIONS_DIR=/data
+      - DEFAULT_TTL_SECONDS=1800
+      - RUNTIME_MEMORY=768m
+      - RUNTIME_CPUS=1.0
+    ports:
+      - "127.0.0.1:8890:8890"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - ./dora/projects:/home/wzu/qqbot/dora/projects
+      - ./dora/sessions:/data
+      - ./data/secrets/dora_game_gateway.token:/run/secrets/dora_game_gateway_token:ro
+    networks:
+      - astrbot_network
+      - dora_games
+    profiles:
+      - dora
+
   # Optional local LLM. Pull your model manually and configure AstrBot provider:
   # api_base: http://ollama-gemma4:11435/v1
   ollama-gemma4:
@@ -91,3 +133,7 @@ services:
 networks:
   astrbot_network:
     driver: bridge
+  dora_games:
+    name: qqbot_dora_games
+    driver: bridge
+    internal: true

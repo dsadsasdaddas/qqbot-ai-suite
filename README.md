@@ -16,6 +16,7 @@
 - 群记忆/群脑：自动记录群聊、周期总结、回答前注入群画像
 - 群风格学习：学习群口癖、句长、吐槽方式
 - 参与策略：别人问它会答，平时按冷却偶尔插嘴
+- Dora SSR 小游戏：`/做游戏 ...` 生成项目，Docker Runtime + noVNC 网页预览
 - Prompt 修改保护、红队模式、Gemma 闲聊风格优化
 
 ## 命令速览
@@ -39,6 +40,11 @@
 
 /参与策略 查看
 /参与策略 安静|正常|活跃|嘴欠
+
+/做游戏 做一个躲避弹幕小游戏，玩家是猫，30秒计分
+/游戏 状态 <id>
+/游戏 日志 <id>
+/游戏 停止 <id>
 ```
 
 ## 架构
@@ -126,3 +132,7 @@ docs/                         架构文档
 - 不要提交 `.env`、`secrets/`、`data/`、`ntqq/`。
 - 代码执行服务默认无网络、只读挂载、低权限、短超时。
 - `/高级` 自动执行默认只开放给配置里的管理员 QQ 号。
+
+## Dora SSR 小游戏 Runtime
+
+`/做游戏` 使用 GLM 生成 Dora Lua 项目，通过 `dora-game-gateway` 启动一个短生命周期 Docker 容器运行 Dora SSR native runtime，并用 Xvfb + noVNC 输出网页预览。详见 [`docs/DORA_GAME_RUNTIME.md`](docs/DORA_GAME_RUNTIME.md)。
