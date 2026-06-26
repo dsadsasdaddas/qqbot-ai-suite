@@ -80,3 +80,8 @@ snakefix*.bgr0
 /start_glm_code_runner.sh
 /start_runner_container_remote.sh
 /, m.parse_redteam_command(s))*
+
+# Local Claude/QQ one-off runtime artifacts
+napcat-qrcode.png
+*.retry
+*.work
